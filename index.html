@@ -1,0 +1,618 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cable Test Log System</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1400px;
+      margin: 0 auto;
+    }
+
+    h1 {
+      color: white;
+      text-align: center;
+      margin-bottom: 30px;
+      font-size: 2.5em;
+      text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      background: rgba(255,255,255,0.1);
+      padding: 10px;
+      border-radius: 10px;
+    }
+
+    .tab {
+      padding: 12px 24px;
+      background: rgba(255,255,255,0.2);
+      border: none;
+      border-radius: 8px;
+      color: white;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    .tab:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .tab.active {
+      background: white;
+      color: #667eea;
+      font-weight: bold;
+    }
+
+    .tab-content {
+      display: none;
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+    }
+
+    .tab-content.active {
+      display: block;
+    }
+
+    .form-group {
+      margin-bottom: 20px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 8px;
+      color: #333;
+      font-weight: 600;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 12px;
+      border: 2px solid #ddd;
+      border-radius: 8px;
+      font-size: 14px;
+      transition: border-color 0.3s;
+    }
+
+    input:focus, select:focus {
+      outline: none;
+      border-color: #667eea;
+    }
+
+    button {
+      background: #667eea;
+      color: white;
+      padding: 12px 24px;
+      border: none;
+      border-radius: 8px;
+      cursor: pointer;
+      font-size: 16px;
+      transition: all 0.3s;
+    }
+
+    button:hover {
+      background: #5568d3;
+      transform: translateY(-2px);
+      box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+    }
+
+    button:disabled {
+      background: #ccc;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-top: 20px;
+    }
+
+    th, td {
+      padding: 12px;
+      text-align: left;
+      border-bottom: 1px solid #ddd;
+    }
+
+    th {
+      background: #667eea;
+      color: white;
+      font-weight: 600;
+    }
+
+    tr:hover {
+      background: #f5f5f5;
+    }
+
+    .status-badge {
+      padding: 4px 12px;
+      border-radius: 12px;
+      font-size: 12px;
+      font-weight: bold;
+    }
+
+    .status-ready {
+      background: #ffd93d;
+      color: #333;
+    }
+
+    .status-completed {
+      background: #6bcf7f;
+      color: white;
+    }
+
+    .log-card {
+      background: #f9f9f9;
+      padding: 20px;
+      border-radius: 10px;
+      margin-bottom: 20px;
+      border-left: 4px solid #667eea;
+    }
+
+    .log-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 15px;
+    }
+
+    .log-info {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+      gap: 15px;
+      margin-bottom: 15px;
+    }
+
+    .info-item {
+      display: flex;
+      flex-direction: column;
+    }
+
+    .info-label {
+      font-size: 12px;
+      color: #666;
+      font-weight: 600;
+      margin-bottom: 4px;
+    }
+
+    .info-value {
+      font-size: 16px;
+      color: #333;
+      font-weight: 500;
+    }
+
+    .alert {
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 20px;
+    }
+
+    .alert-success {
+      background: #d4edda;
+      color: #155724;
+      border: 1px solid #c3e6cb;
+    }
+
+    .alert-error {
+      background: #f8d7da;
+      color: #721c24;
+      border: 1px solid #f5c6cb;
+    }
+
+    .btn-secondary {
+      background: #6c757d;
+    }
+
+    .btn-secondary:hover {
+      background: #5a6268;
+    }
+
+    .btn-danger {
+      background: #dc3545;
+    }
+
+    .btn-danger:hover {
+      background: #c82333;
+    }
+
+    .action-buttons {
+      display: flex;
+      gap: 10px;
+      flex-wrap: wrap;
+    }
+
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      right: 0;
+      bottom: 0;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: white;
+      padding: 30px;
+      border-radius: 15px;
+      max-width: 500px;
+      width: 90%;
+    }
+
+    .modal-buttons {
+      display: flex;
+      gap: 10px;
+      justify-content: flex-end;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>📊 Cable Test Log System</h1>
+
+    <div class="tabs">
+      <button class="tab active" onclick="switchTab('master')">Master Data</button>
+      <button class="tab" onclick="switchTab('logs')">Test Logs</button>
+      <button class="tab" onclick="switchTab('entry')">Manual Entry</button>
+    </div>
+
+    <!-- Master Data Tab -->
+    <div id="master" class="tab-content active">
+      <h2>Add Master Data Entry</h2>
+      <div id="masterAlert"></div>
+      
+      <form id="masterForm">
+        <div class="form-group">
+          <label>Tester ID</label>
+          <input type="text" id="testerId" required>
+        </div>
+        <div class="form-group">
+          <label>Part Number</label>
+          <input type="text" id="partNumber" required>
+        </div>
+        <div class="form-group">
+          <label>Batch Number</label>
+          <input type="text" id="batchNumber" required>
+        </div>
+        <div class="form-group">
+          <label>MO Number</label>
+          <input type="text" id="moNumber" required>
+        </div>
+        <div class="form-group">
+          <label>MO Qty</label>
+          <input type="number" id="moQty" required>
+        </div>
+        <button type="submit">Add Entry</button>
+      </form>
+
+      <h3 style="margin-top: 40px;">Master Data List</h3>
+      <table id="masterTable">
+        <thead>
+          <tr>
+            <th>S.No</th>
+            <th>Tester ID</th>
+            <th>Part Number</th>
+            <th>Batch Number</th>
+            <th>MO Number</th>
+            <th>MO Qty</th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody id="masterTableBody"></tbody>
+      </table>
+    </div>
+
+    <!-- Test Logs Tab -->
+    <div id="logs" class="tab-content">
+      <h2>Test Logs</h2>
+      <div id="logsContainer"></div>
+    </div>
+
+    <!-- Manual Entry Tab -->
+    <div id="entry" class="tab-content">
+      <h2>Manual Test Log Entry</h2>
+      <div id="entryAlert"></div>
+
+      <div class="form-group">
+        <label>Select MO Number</label>
+        <select id="moSelect">
+          <option value="">-- Select MO Number --</option>
+        </select>
+      </div>
+
+      <form id="entryForm">
+        <div class="form-group">
+          <label>Operator ID</label>
+          <input type="text" id="opId" required>
+        </div>
+        <div class="form-group">
+          <label>Cable Assembly S.No</label>
+          <input type="text" id="dutSno" required>
+        </div>
+        <button type="submit">Add Test Entry</button>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const API_BASE = 'http://localhost:4010/api';
+
+    // Tab switching
+    function switchTab(tabName) {
+      document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('active'));
+      
+      event.target.classList.add('active');
+      document.getElementById(tabName).classList.add('active');
+
+      if (tabName === 'master') loadMasterData();
+      if (tabName === 'logs') loadTestLogs();
+      if (tabName === 'entry') loadMOOptions();
+    }
+
+    // Show alert
+    function showAlert(containerId, message, type = 'success') {
+      const container = document.getElementById(containerId);
+      container.innerHTML = `<div class="alert alert-${type}">${message}</div>`;
+      setTimeout(() => container.innerHTML = '', 5000);
+    }
+
+    // Master Data Form
+    document.getElementById('masterForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const data = {
+        testerId: document.getElementById('testerId').value,
+        partNumber: document.getElementById('partNumber').value,
+        batchNumber: document.getElementById('batchNumber').value,
+        moNumber: document.getElementById('moNumber').value,
+        moQty: document.getElementById('moQty').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/master-data`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          showAlert('masterAlert', 'Entry added successfully!');
+          e.target.reset();
+          loadMasterData();
+        } else {
+          const error = await response.json();
+          showAlert('masterAlert', error.error, 'error');
+        }
+      } catch (err) {
+        showAlert('masterAlert', 'Failed to connect to server', 'error');
+      }
+    });
+
+    // Load Master Data
+    async function loadMasterData() {
+      try {
+        const response = await fetch(`${API_BASE}/master-data`);
+        const data = await response.json();
+        
+        const tbody = document.getElementById('masterTableBody');
+        tbody.innerHTML = data.map((entry, index) => `
+          <tr>
+            <td>${entry.sno}</td>
+            <td>${entry.testerId}</td>
+            <td>${entry.partNumber}</td>
+            <td>${entry.batchNumber}</td>
+            <td>${entry.moNumber}</td>
+            <td>${entry.moQty}</td>
+            <td>
+              <button onclick="createLog(${index})" ${entry.logged ? 'disabled' : ''}>
+                ${entry.logged ? 'Logged' : 'Create Log'}
+              </button>
+            </td>
+          </tr>
+        `).join('');
+      } catch (err) {
+        console.error('Failed to load master data:', err);
+      }
+    }
+
+    // Create Test Log
+    async function createLog(index) {
+      try {
+        const response = await fetch(`${API_BASE}/create-log/${index}`, {
+          method: 'POST'
+        });
+
+        if (response.ok) {
+          showAlert('masterAlert', 'Test log created successfully!');
+          loadMasterData();
+        } else {
+          const error = await response.json();
+          showAlert('masterAlert', error.message || error.error, 'error');
+        }
+      } catch (err) {
+        showAlert('masterAlert', 'Failed to create log', 'error');
+      }
+    }
+
+    // Load Test Logs
+    async function loadTestLogs() {
+      try {
+        const response = await fetch(`${API_BASE}/test-logs`);
+        const logs = await response.json();
+        
+        const container = document.getElementById('logsContainer');
+        
+        if (Object.keys(logs).length === 0) {
+          container.innerHTML = '<p>No test logs found.</p>';
+          return;
+        }
+
+        container.innerHTML = Object.entries(logs).map(([moNumber, log]) => {
+          const uniqueCount = new Set(log.entries.map(e => e.dutSno)).size;
+          
+          return `
+            <div class="log-card">
+              <div class="log-header">
+                <h3>MO Number: ${moNumber}</h3>
+                <button class="btn-danger" onclick="deleteLog('${moNumber}')">Delete</button>
+              </div>
+              
+              <div class="log-info">
+                <div class="info-item">
+                  <span class="info-label">Tester ID</span>
+                  <span class="info-value">${log.testerId}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Part Number</span>
+                  <span class="info-value">${log.partNumber}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Batch Number</span>
+                  <span class="info-value">${log.batchNumber}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">MO Qty</span>
+                  <span class="info-value">${log.moQty}</span>
+                </div>
+                <div class="info-item">
+                  <span class="info-label">Unique Tested</span>
+                  <span class="info-value">${uniqueCount}</span>
+                </div>
+              </div>
+
+              <table>
+                <thead>
+                  <tr>
+                    <th>OP ID</th>
+                    <th>DUT S.No</th>
+                    <th>Test Time</th>
+                    <th>White</th>
+                    <th>Black</th>
+                    <th>Red</th>
+                    <th>Status</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  ${log.entries.map(entry => `
+                    <tr>
+                      <td>${entry.opId}</td>
+                      <td>${entry.dutSno}</td>
+                      <td>${entry.testTime ? new Date(entry.testTime).toLocaleString() : '-'}</td>
+                      <td>${entry.white || '-'}</td>
+                      <td>${entry.black || '-'}</td>
+                      <td>${entry.red || '-'}</td>
+                      <td>
+                        <span class="status-badge status-${entry.status.toLowerCase()}">
+                          ${entry.status}
+                        </span>
+                      </td>
+                    </tr>
+                  `).join('')}
+                </tbody>
+              </table>
+            </div>
+          `;
+        }).join('');
+      } catch (err) {
+        console.error('Failed to load test logs:', err);
+      }
+    }
+
+    // Delete Test Log
+    async function deleteLog(moNumber) {
+      if (!confirm(`Are you sure you want to delete log for MO ${moNumber}?`)) return;
+
+      try {
+        const response = await fetch(`${API_BASE}/test-log/${moNumber}`, {
+          method: 'DELETE'
+        });
+
+        if (response.ok) {
+          loadTestLogs();
+        }
+      } catch (err) {
+        alert('Failed to delete log');
+      }
+    }
+
+    // Load MO Options
+    async function loadMOOptions() {
+      try {
+        const response = await fetch(`${API_BASE}/test-logs`);
+        const logs = await response.json();
+        
+        const select = document.getElementById('moSelect');
+        select.innerHTML = '<option value="">-- Select MO Number --</option>' +
+          Object.keys(logs).map(mo => `<option value="${mo}">${mo}</option>`).join('');
+      } catch (err) {
+        console.error('Failed to load MO options:', err);
+      }
+    }
+
+    // Manual Entry Form
+    document.getElementById('entryForm').addEventListener('submit', async (e) => {
+      e.preventDefault();
+      
+      const moNumber = document.getElementById('moSelect').value;
+      if (!moNumber) {
+        showAlert('entryAlert', 'Please select an MO Number', 'error');
+        return;
+      }
+
+      const data = {
+        opId: document.getElementById('opId').value,
+        dutSno: document.getElementById('dutSno').value
+      };
+
+      try {
+        const response = await fetch(`${API_BASE}/test-entry/${moNumber}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(data)
+        });
+
+        if (response.ok) {
+          showAlert('entryAlert', 'Test entry added successfully!');
+          e.target.reset();
+        } else {
+          const error = await response.json();
+          showAlert('entryAlert', error.error, 'error');
+        }
+      } catch (err) {
+        showAlert('entryAlert', 'Failed to connect to server', 'error');
+      }
+    });
+
+    // Initial load
+    loadMasterData();
+  </script>
+</body>
+</html>
