@@ -197,6 +197,7 @@ app.delete('/api/test-log/:moNumber', (req, res) => {
   res.json({ success: true });
 });
 
-app.listen(PORT, () => {
-  console.log(`Cable Test API running on http://localhost:${PORT}`);
+app.listen(PORT, '0.0.0.0', () => {
+  console.log(`Cable Test API running on http://0.0.0.0:${PORT}`);
+  console.log(`Accessible at http://10.83.9.16:${PORT}`);
 });
