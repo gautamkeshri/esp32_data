@@ -1,0 +1,380 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cable Test Log System - Node.js Version</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 3px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Cable Test Log System - Node.js Version</h1>
+<p>A simple Node.js application converted from Google Apps Script for managing cable testing logs.</p>
+
+<h2>Features</h2>
+<ul>
+    <li><strong>Master Data Management</strong> - Add and track test configurations</li>
+    <li><strong>Auto Log Creation</strong> - Create test logs from master data entries</li>
+    <li><strong>Manual Test Entry</strong> - Add test entries via UI</li>
+    <li><strong>ESP32 Integration</strong> - Webhook endpoint for automated test result logging</li>
+    <li><strong>No Authentication</strong> - Simple setup for local use</li>
+</ul>
+
+<h2>Project Structure</h2>
+<pre>
+cable-test-system/
+├── server.js         # Backend API (Port 4010)
+├── index.html        # Frontend UI (Port 4000)
+├── package.json      # Dependencies
+└── data.json         # Auto-generated data file
+</pre>
+
+<h2>Installation</h2>
+<ol>
+    <li><strong>Install Node.js</strong> (if not already installed)
+        <ul>
+            <li>Download from: <a href="https://nodejs.org/" style="color: blue;" target="_blank">https://nodejs.org/</a></li>
+        </ul>
+    </li>
+    <li><strong>Create project directory</strong>
+        <pre>
+mkdir cable-test-system
+cd cable-test-system
+        </pre>
+    </li>
+    <li><strong>Save the files</strong>
+        <ul>
+            <li>Save <code>package.json</code></li>
+            <li>Save <code>server.js</code></li>
+            <li>Save <code>index.html</code></li>
+        </ul>
+    </li>
+    <li><strong>Install dependencies</strong>
+        <pre>
+npm install
+        </pre>
+    </li>
+</ol>
+
+<h2>Running the Application</h2>
+<h3>Start Backend API (Port 4010)</h3>
+<pre>
+npm start
+</pre>
+<p>Or for development with auto-reload:</p>
+<pre>
+npm run dev
+</pre>
+
+<h3>Start Frontend UI (Port 4000)</h3>
+<p><strong>Option 1: Using Python 3</strong></p>
+<pre>
+python -m http.server 4000
+</pre>
+
+<p><strong>Option 2: Using Node.js http-server</strong></p>
+<pre>
+npx http-server -p 4000
+</pre>
+
+<p><strong>Option 3: Using VS Code Live Server</strong></p>
+<ul>
+    <li>Install "Live Server" extension</li>
+    <li>Right-click <code>index.html</code> → "Open with Live Server"</li>
+    <li>Change port to 4000 in settings if needed</li>
+</ul>
+
+<h2>Usage</h2>
+<h3>1. Add Master Data</h3>
+<ul>
+    <li>Go to "Master Data" tab</li>
+    <li>Fill in Tester ID, Part Number, Batch Number, MO Number, and MO Qty</li>
+    <li>Click "Add Entry"</li>
+    <li>Click "Create Log" to generate a test log for that MO Number</li>
+</ul>
+
+<h3>2. Manual Test Entry</h3>
+<ul>
+    <li>Go to "Manual Entry" tab</li>
+    <li>Select an MO Number from dropdown</li>
+    <li>Enter Operator ID and Cable Assembly S.No</li>
+    <li>Click "Add Test Entry"</li>
+    <li>Entry will be marked as "READY" for testing</li>
+</ul>
+
+<h3>3. View Test Logs</h3>
+<ul>
+    <li>Go to "Test Logs" tab</li>
+    <li>View all active test logs with their entries</li>
+    <li>See test results (White, Black, Red values)</li>
+    <li>Track unique tested count</li>
+</ul>
+
+<h3>4. ESP32 Integration</h3>
+<p>The ESP32 can send test results to the webhook endpoint:</p>
+<p><strong>Endpoint:</strong> <code>POST http://localhost:4010/api/log-result</code></p>
+<p><strong>Payload:</strong></p>
+<pre>
+{
+  "white": "PASS",
+  "black": "PASS",
+  "red": "FAIL"
+}
+</pre>
+<p><strong>Response:</strong></p>
+<pre>
+{
+  "success": true,
+  "message": "OK - Logged in MO 12345",
+  "moNumber": "12345"
+}
+</pre>
+<p>The system automatically finds the first "READY" entry across all logs and updates it with the test results.</p>
+
+<h2>API Endpoints</h2>
+
+<h3>Master Data</h3>
+<ul>
+    <li><code>GET /api/master-data</code> - Get all master data entries</li>
+    <li><code>POST /api/master-data</code> - Add new master data entry</li>
+    <li><code>POST /api/create-log/:index</code> - Create test log from master data entry</li>
+</ul>
+
+<h3>Test Logs</h3>
+<ul>
+    <li><code>GET /api/test-logs</code> - Get all test logs</li>
+    <li><code>GET /api/test-log/:moNumber</code> - Get specific test log</li>
+    <li><code>DELETE /api/test-log/:moNumber</code> - Delete test log</li>
+</ul>
+
+<h3>Test Entries</h3>
+<ul>
+    <li><code>POST /api/test-entry/:moNumber</code> - Add manual test entry</li>
+    <li><code>POST /api/log-result</code> - ESP32 webhook to log test results</li>
+</ul>
+
+<h2>Data Storage</h2>
+<p>Data is stored in <code>data.json</code> file with the following structure:</p>
+<pre>
+{
+  "masterData": [
+    {
+      "sno": 1,
+      "testerId": "T001",
+      "partNumber": "PN-12345",
+      "batchNumber": "B001",
+      "moNumber": "MO-001",
+      "moQty": 100,
+      "logged": true,
+      "createdAt": "2025-10-07T10:00:00.000Z"
+    }
+  ],
+  "testLogs": {
+    "MO-001": {
+      "testerId": "T001",
+      "partNumber": "PN-12345",
+      "batchNumber": "B001",
+      "moNumber": "MO-001",
+      "moQty": 100,
+      "createdAt": "2025-10-07T10:00:00.000Z",
+      "entries": [
+        {
+          "opId": "OP123",
+          "dutSno": "DUT-001",
+          "status": "COMPLETED",
+          "createdAt": "2025-10-07T10:05:00.000Z",
+          "testTime": "2025-10-07T10:10:00.000Z",
+          "white": "PASS",
+          "black": "PASS",
+          "red": "PASS"
+        }
+      ]
+    }
+  }
+}
+</pre>
+
+<h2>ESP32 Arduino Example Code</h2>
+<pre>
+#include &lt;WiFi.h&gt;
+#include &lt;HTTPClient.h&gt;
+
+const char* ssid = "YOUR_WIFI_SSID";
+const char* password = "YOUR_WIFI_PASSWORD";
+const char* serverUrl = "http://YOUR_SERVER_IP:4010/api/log-result";
+
+void setup() {
+  Serial.begin(115200);
+
+  // Connect to WiFi
+  WiFi.begin(ssid, password);
+  while (WiFi.status() != WL_CONNECTED) {
+    delay(1000);
+    Serial.println("Connecting to WiFi...");
+  }
+  Serial.println("Connected to WiFi");
+}
+
+void sendTestResults(String white, String black, String red) {
+  if (WiFi.status() == WL_CONNECTED) {
+    HTTPClient http;
+    http.begin(serverUrl);
+    http.addHeader("Content-Type", "application/json");
+
+    // Create JSON payload
+    String payload = "{";
+    payload += "\"white\":\"" + white + "\",";
+    payload += "\"black\":\"" + black + "\",";
+    payload += "\"red\":\"" + red + "\"";
+    payload += "}";
+
+    int httpResponseCode = http.POST(payload);
+
+    if (httpResponseCode &gt; 0) {
+      String response = http.getString();
+      Serial.println("Response: " + response);
+    } else {
+      Serial.println("Error: " + String(httpResponseCode));
+    }
+
+    http.end();
+  }
+}
+
+void loop() {
+  // Your test logic here
+  // Example: Send test results
+  String whiteResult = "PASS";
+  String blackResult = "PASS";
+  String redResult = "FAIL";
+
+  sendTestResults(whiteResult, blackResult, redResult);
+
+  delay(10000); // Wait 10 seconds before next test
+}
+</pre>
+
+<h2>Differences from Google Apps Script</h2>
+<table>
+    <tr>
+        <th>Feature</th>
+        <th>Google Apps Script</th>
+        <th>Node.js Version</th>
+    </tr>
+    <tr>
+        <td>Storage</td>
+        <td>Google Sheets</td>
+        <td>JSON file (data.json)</td>
+    </tr>
+    <tr>
+        <td>UI</td>
+        <td>Google Sheets UI</td>
+        <td>Web-based HTML/CSS/JS</td>
+    </tr>
+    <tr>
+        <td>Triggers</td>
+        <td>onEdit, onOpen</td>
+        <td>REST API endpoints</td>
+    </tr>
+    <tr>
+        <td>Authentication</td>
+        <td>Google OAuth</td>
+        <td>None (local use)</td>
+    </tr>
+    <tr>
+        <td>Hosting</td>
+        <td>Google Cloud</td>
+        <td>Local/Self-hosted</td>
+    </tr>
+    <tr>
+        <td>Real-time sync</td>
+        <td>Automatic</td>
+        <td>Manual refresh needed</td>
+    </tr>
+</table>
+
+<h2>Key Conversions Made</h2>
+<ol>
+    <li><strong>onEdit trigger</strong> → <code>POST /api/create-log/:index</code> endpoint</li>
+    <li><strong>onOpen menu</strong> → Web-based tab navigation</li>
+    <li><strong>testLogEntry() prompt</strong> → Web form for manual entry</li>
+    <li><strong>doPost() webhook</strong> → <code>POST /api/log-result</code> endpoint</li>
+    <li><strong>Sheet operations</strong> → In-memory data with JSON persistence</li>
+    <li><strong>READY flag</strong> → Status field in entry objects</li>
+</ol>
+
+<h2>Production Considerations</h2>
+<p>For production use, consider adding:</p>
+<ul>
+    <li><strong>Database</strong>: Replace JSON file with MongoDB, PostgreSQL, or MySQL</li>
+    <li><strong>Authentication</strong>: Add JWT or session-based auth</li>
+    <li><strong>Validation</strong>: Enhanced input validation and sanitization</li>
+    <li><strong>Error Handling</strong>: More robust error handling and logging</li>
+    <li><strong>Rate Limiting</strong>: Prevent API abuse</li>
+    <li><strong>HTTPS</strong>: Use SSL/TLS certificates</li>
+    <li><strong>Docker</strong>: Containerize for easier deployment</li>
+    <li><strong>Environment Variables</strong>: Use .env for configuration</li>
+    <li><strong>Backup</strong>: Automated backup of data.json</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+<h3>Port already in use:</h3>
+<pre>
+# Kill process on port 4010 (Backend)
+lsof -ti:4010 | xargs kill -9
+
+# Kill process on port 4000 (Frontend)
+lsof -ti:4000 | xargs kill -9
+</pre>
+
+<h3>CORS errors:</h3>
+<ul>
+    <li>Ensure backend is running on port 4010</li>
+    <li>Check that frontend is accessing correct API URL</li>
+</ul>
+
+<h3>Data not persisting:</h3>
+<ul>
+    <li>Check write permissions in project directory</li>
+    <li>Verify data.json is being created</li>
+</ul>
+
+<h3>ESP32 can't connect:</h3>
+<ul>
+    <li>Ensure ESP32 and server are on same network</li>
+    <li>Use server's local IP address (not localhost)</li>
+    <li>Check firewall settings</li>
+</ul>
+
+<h2>License</h2>
+<p>MIT License - Free to use and modify</p>
+
+<h2>Support</h2>
+<p>For issues or questions, please check:</p>
+<ul>
+    <li>API is running: <code>http://localhost:4010/api/master-data</code></li>
+    <li>Frontend is accessible: <code>http://localhost:4000</code></li>
+    <li>Data file exists: <code>data.json</code> in project root</li>
+</ul>
+
+</body>
+</html>

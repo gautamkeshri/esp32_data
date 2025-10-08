@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cable Test System - API Testing Guide</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            margin: 20px;
+        }
+        h1, h2, h3, h4 {
+            color: #2c3e50;
+        }
+        code {
+            background-color: #f4f4f4;
+            padding: 3px;
+            border-radius: 3px;
+        }
+        pre {
+            background-color: #f4f4f4;
+            padding: 10px;
+            border-radius: 3px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+
+<h1>Cable Test System - API Testing Guide</h1>
+<p>Complete CURL commands for testing all API endpoints.</p>
+
+<h2>Prerequisites</h2>
+<ul>
+    <li>Backend server running on <code>http://localhost:4010</code></li>
+    <li>CURL installed (comes with most systems)</li>
+    <li>Optional: <code>jq</code> for pretty JSON output (<code>brew install jq</code> or <code>apt install jq</code>)</li>
+</ul>
+
+<h2>Master Data Endpoints</h2>
+
+<h3>1. Get All Master Data</h3>
+<p><strong>Endpoint:</strong> <code>GET /api/master-data</code></p>
+<pre>
+curl http://localhost:4010/api/master-data
+</pre>
+<p><strong>Expected Response:</strong></p>
+<pre>
+[
+  {
+    "sno": 1,
+    "testerId": "T001",
+    "partNumber": "PN-12345",
+    "batchNumber": "B001",
+    "moNumber": "MO-001",
+    "moQty": 100,
+    "logged": false,
+    "createdAt": "2025-10-07T10:00:00.000Z"
+  }
+]
+</pre>
+
+<h3>2. Add New Master Data Entry</h3>
+<p><strong>Endpoint:</strong> <code>POST /api/master-data</code></p>
+<pre>
+curl -X POST http://localhost:4010/api/master-data \
+  -H "Content-Type: application/json" \
+  -d '{
+    "testerId": "T001",
+    "partNumber": "PN-12345",
+    "batchNumber": "B001",
+    "moNumber": "MO-001",
+    "moQty": 100
+  }'
+</pre>
+<p><strong>Windows (CMD):</strong></p>
+<pre>
+curl -X POST http://localhost:4010/api/master-data -H "Content-Type: application/json" -d "{\"testerId\":\"T001\",\"partNumber\":\"PN-12345\",\"batchNumber\":\"B001\",\"moNumber\":\"MO-001\",\"moQty\":100}"
+</pre>
+
+<h3>3. Create Test Log from Master Data</h3>
+<p><strong>Endpoint:</strong> <code>POST /api/create-log/:index</code></p>
+<pre>
+# Create log from first master data entry (index 0)
+curl -X POST http://localhost:4010/api/create-log/0
+</pre>
+
+<h3>4. Get All Test Logs</h3>
+<p><strong>Endpoint:</strong> <code>GET /api/test-logs</code></p>
+<pre>
+curl http://localhost:4010/api/test-logs
+</pre>
+
+<h3>5. Get Specific Test Log</h3>
+<p><strong>Endpoint:</strong> <code>GET /api/test-log/:moNumber</code></p>
+<pre>
+curl http://localhost:4010/api/test-log/MO-001
+</pre>
+
+<h3>6. Delete Test Log</h3>
+<p><strong>Endpoint:</strong> <code>DELETE /api/test-log/:moNumber</code></p>
+<pre>
+curl -X DELETE http://localhost:4010/api/test-log/MO-001
+</pre>
+
+<h2>Test Entry Endpoints</h2>
+<h3>Add Manual Test Entry</h3>
+<p><strong>Endpoint:</strong> <code>POST /api/test-entry/:moNumber</code></p>
+<pre>
+curl -X POST http://localhost:4010/api/test-entry/MO-001 \
+  -H "Content-Type: application/json" \
+  -d '{
+    "opId": "OP123",
+    "dutSno": "DUT-001"
+  }'
+</pre>
+
+<h3>ESP32 Webhook Endpoint</h3>
+<p><strong>Endpoint:</strong> <code>POST /api/log-result</code></p>
+<pre>
+curl -X POST http://localhost:4010/api/log-result \
+  -H "Content-Type: application/json" \
+  -d '{
+    "white": "PASS",
+    "black": "PASS",
+    "red": "PASS"
+  }'
+</pre>
+
+<h2>Common Issues</h2>
+<h3>Connection Refused</h3>
+<pre>
+curl: (7) Failed to connect to localhost port 4010: Connection refused
+</pre>
+<p><strong>Solution:</strong> Ensure backend server is running with <code>npm start</code></p>
+
+<h2>Testing Checklist</h2>
+<ul>
+    <li>Add master data entry</li>
+    <li>Create test log</li>
+    <li>Add manual test entry</li>
+    <li>Log test results via webhook</li>
+    <li>View specific test log</li>
+    <li>View all test logs</li>
+    <li>Delete test log</li>
+    <li>Test error handling (missing fields)</li>
+    <li>Test duplicate MO number handling</li>
+    <li>Test with multiple entries</li>
+    <li>Verify data persistence (restart server)</li>
+</ul>
+
+<h2>License</h2>
+<p>MIT License - Free to use and modify</p>
+
+<h2>Support</h2>
+<p>For issues or questions, please check:</p>
+<ul>
+    <li>API is running: <code>http://localhost:4010/api/master-data</code></li>
+    <li>Frontend is accessible: <code>http://localhost:4000</code></li>
+    <li>Data file exists: <code>data.json</code> in project root</li>
+</ul>
+
+<small>Last Updated: October 2025</small>  
+<small>API Version: 1.0.0</small>  
+<small>Base URL: <code>http://localhost:4010/api</code></small>
+
+</body>
+</html>
